@@ -13,6 +13,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -74,6 +75,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\MonoGame.Framework.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -99,6 +104,7 @@
     </Compile>
     <Compile Include="DDSHelper.cs" />
     <Compile Include="FBX2FLVERImportJobConfig.cs" />
+    <Compile Include="FBX2FLVERLayoutHelper.cs" />
     <Compile Include="FBX2FLVERMaterialLibrary.cs" />
     <Compile Include="FBX2FLVER_Enums.cs" />
     <Compile Include="ExtensionMethods.cs" />
@@ -146,6 +152,7 @@
     <EmbeddedResource Include="EmbeddedResources\FC_M_0000.partsbnd" />
     <EmbeddedResource Include="EmbeddedResources\FC_M_0000_M.partsbnd" />
     <EmbeddedResource Include="EmbeddedResources\FC_F_0000_M.partsbnd" />
+    <EmbeddedResource Include="EmbeddedResources\DS1_MTD_INFO.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -182,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />
+    <Content Include="lib\Newtonsoft.Json.dll" />
     <Content Include="lib\SharpDX.Direct2D1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

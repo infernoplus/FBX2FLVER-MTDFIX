@@ -30,9 +30,12 @@ namespace FBX2FLVER.Solvers
 
                     flverMesh.Vertices[i].Position = Vector3.Transform(new Vector3(flverMesh.Vertices[i].Position.X, flverMesh.Vertices[i].Position.Y, flverMesh.Vertices[i].Position.Z), m).ToNumerics();
                     Vector3 normVec = Vector3.Normalize(Vector3.Transform(new Vector3(flverMesh.Vertices[i].Normal.X, flverMesh.Vertices[i].Normal.Y, flverMesh.Vertices[i].Normal.Z), m));
-                    flverMesh.Vertices[i].Normal = new System.Numerics.Vector4(normVec.X, normVec.Y, normVec.Z, flverMesh.Vertices[i].Normal.W);
-                    var rotBitangentVec3 = Vector3.Transform(new Vector3(flverMesh.Vertices[i].Tangents[0].X, flverMesh.Vertices[i].Tangents[0].Y, flverMesh.Vertices[i].Tangents[0].Z), m);
-                    flverMesh.Vertices[i].Tangents[0] = new System.Numerics.Vector4(rotBitangentVec3.X, rotBitangentVec3.Y, rotBitangentVec3.Z, flverMesh.Vertices[i].Tangents[0].W);
+                    flverMesh.Vertices[i].Normal = new System.Numerics.Vector3(normVec.X, normVec.Y, normVec.Z);
+                    if (flverMesh.Vertices[i].Tangents.Count > 0)
+                    {
+                        var rotBitangentVec3 = Vector3.Transform(new Vector3(flverMesh.Vertices[i].Tangents[0].X, flverMesh.Vertices[i].Tangents[0].Y, flverMesh.Vertices[i].Tangents[0].Z), m);
+                        flverMesh.Vertices[i].Tangents[0] = new System.Numerics.Vector4(rotBitangentVec3.X, rotBitangentVec3.Y, rotBitangentVec3.Z, flverMesh.Vertices[i].Tangents[0].W);
+                    }
                 }
             }
 
@@ -84,12 +87,12 @@ namespace FBX2FLVER.Solvers
                         if (Importer.JOBCONFIG.SkeletonRotation != Vector3.Zero)
                         {
                             Matrix boneTrans_Xna = Matrix.CreateRotationY(Importer.JOBCONFIG.SkeletonRotation.Y)
-                            *  Matrix.CreateRotationZ(Importer.JOBCONFIG.SkeletonRotation.Z)
+                            * Matrix.CreateRotationZ(Importer.JOBCONFIG.SkeletonRotation.Z)
                             * Matrix.CreateRotationX(Importer.JOBCONFIG.SkeletonRotation.X);
 
                             flver.Bones[b].Rotation += new System.Numerics.Vector3(
-                                Importer.JOBCONFIG.SkeletonRotation.X, 
-                                Importer.JOBCONFIG.SkeletonRotation.Y, 
+                                Importer.JOBCONFIG.SkeletonRotation.X,
+                                Importer.JOBCONFIG.SkeletonRotation.Y,
                                 Importer.JOBCONFIG.SkeletonRotation.Z);
 
                             flver.Bones[b].Translation = Vector3.Transform(new Vector3(flver.Bones[b].Translation.X, flver.Bones[b].Translation.Y, flver.Bones[b].Translation.Z), boneTrans_Xna).ToNumerics();
@@ -105,10 +108,10 @@ namespace FBX2FLVER.Solvers
                         ch.Translation *= flver.Bones[b].Scale;
                         ch.Scale *= flver.Bones[b].Scale;
                         //hasChildren = true;
-                        
+
                     }
 
-                    foreach (var dmy in flver.Dummies.Where(d => d.DummyBoneIndex == b))
+                    foreach (var dmy in flver.Dummies.Where(d => d.ParentBoneIndex == b))
                     {
                         dmy.Position *= flver.Bones[b].Scale;
                     }
@@ -167,89 +170,88 @@ namespace FBX2FLVER.Solvers
                                 var x = vert.Normal.X;
                                 var y = vert.Normal.Y;
                                 var z = vert.Normal.Z;
-                                var w = vert.Normal.W;
 
-                                vert.Normal = new System.Numerics.Vector4(x, -z, y, w);
+                                vert.Normal = new System.Numerics.Vector3(x, -z, y);
+
+                                if (Importer.JOBCONFIG.RotateNormalsBackward)
+                                {
+                                    var normVec3 = Vector3.Transform(new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z), Matrix.CreateRotationY(MathHelper.Pi));
+                                    vert.Normal = new System.Numerics.Vector3(normVec3.X, normVec3.Y, normVec3.Z);
+                                }
+
+
+
                             }
-
-                            if (Importer.JOBCONFIG.RotateNormalsBackward)
-                            {
-                                var normVec3 = Vector3.Transform(new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z), Matrix.CreateRotationY(MathHelper.Pi));
-                                vert.Normal = new System.Numerics.Vector4(normVec3.X, normVec3.Y, normVec3.Z, vert.Normal.W);
-                            }
-                                
-
-                            
                         }
                     }
                 }
-            }
 
 
 
-            //foreach (var m in flver.Submeshes)
-            //{
-            //    foreach (var v in m.Vertices)
-            //    {
-            //        var norm = (Vector3)v.Normal;
-            //        var tan = (Vector3)v.BiTangent;
+                //foreach (var m in flver.Submeshes)
+                //{
+                //    foreach (var v in m.Vertices)
+                //    {
+                //        var norm = (Vector3)v.Normal;
+                //        var tan = (Vector3)v.BiTangent;
 
-            //        v.BiTangent = new Vector4(Vector3.Cross(norm, tan) * v.BiTangent.W, v.BiTangent.W);
-            //    }
-            //}
-
-
-            //}
-            //while (anyAdjusted);
+                //        v.BiTangent = new Vector4(Vector3.Cross(norm, tan) * v.BiTangent.W, v.BiTangent.W);
+                //    }
+                //}
 
 
+                //}
+                //while (anyAdjusted);
 
 
-            //if (solveBones)
-            //{
-            //    foreach (var bone in flver.Bones.Where(b => b.ParentIndex == -1))
-            //    {
-            //        var origMatrix = Matrix.CreateTranslation(bone.Translation)
-            //            * Matrix.CreateScale(bone.Scale);
 
-            //        var m = Matrix.CreateRotationZ(-MathHelper.PiOver2)
-            //            //* Matrix.CreateRotationX(MathHelper.Pi)
-            //            ;
 
-            //        if ((origMatrix * m).Decompose(out var scale, out _, out var trans))
-            //        {
-            //            bone.Translation = trans;
-            //            bone.Scale = scale;
-            //        }
+                //if (solveBones)
+                //{
+                //    foreach (var bone in flver.Bones.Where(b => b.ParentIndex == -1))
+                //    {
+                //        var origMatrix = Matrix.CreateTranslation(bone.Translation)
+                //            * Matrix.CreateScale(bone.Scale);
 
-            //        bone.EulerRadian.Z += -MathHelper.PiOver2;
-            //        //bone.EulerRadian.X += MathHelper.Pi;
+                //        var m = Matrix.CreateRotationZ(-MathHelper.PiOver2)
+                //            //* Matrix.CreateRotationX(MathHelper.Pi)
+                //            ;
 
-            //    }
-            //}
+                //        if ((origMatrix * m).Decompose(out var scale, out _, out var trans))
+                //        {
+                //            bone.Translation = trans;
+                //            bone.Scale = scale;
+                //        }
 
-            foreach (var dmy in flver.Dummies)
-            {
-                var m = Matrix.Identity;
-                bool wasAnyRotationAppliedFatcat = false;
-                if (Importer.JOBCONFIG.SceneRotation.Y != 0)
+                //        bone.EulerRadian.Z += -MathHelper.PiOver2;
+                //        //bone.EulerRadian.X += MathHelper.Pi;
+
+                //    }
+                //}
+
+                foreach (var dmy in flver.Dummies)
                 {
-                    m *= Matrix.CreateRotationY(Importer.JOBCONFIG.SceneRotation.Y);
-                    wasAnyRotationAppliedFatcat = true;
+                    var m = Matrix.Identity;
+                    bool wasAnyRotationAppliedFatcat = false;
+                    if (Importer.JOBCONFIG.SceneRotation.Y != 0)
+                    {
+                        m *= Matrix.CreateRotationY(Importer.JOBCONFIG.SceneRotation.Y);
+                        wasAnyRotationAppliedFatcat = true;
+                    }
+                    if (Importer.JOBCONFIG.SceneRotation.Z != 0)
+                    {
+                        m *= Matrix.CreateRotationZ(Importer.JOBCONFIG.SceneRotation.Z);
+                        wasAnyRotationAppliedFatcat = true;
+                    }
+                    if (Importer.JOBCONFIG.SceneRotation.X != 0)
+                    {
+                        m *= Matrix.CreateRotationX(Importer.JOBCONFIG.SceneRotation.X);
+                        wasAnyRotationAppliedFatcat = true;
+                    }
+
+                    if (wasAnyRotationAppliedFatcat)
+                        dmy.Position = Vector3.Transform(new Vector3(dmy.Position.X, dmy.Position.Y, dmy.Position.Z), m).ToNumerics();
                 }
-                if (Importer.JOBCONFIG.SceneRotation.Z != 0)
-                {
-                    m *= Matrix.CreateRotationZ(Importer.JOBCONFIG.SceneRotation.Z);
-                    wasAnyRotationAppliedFatcat = true;
-                }
-                if (Importer.JOBCONFIG.SceneRotation.X != 0)
-                {
-                    m *= Matrix.CreateRotationX(Importer.JOBCONFIG.SceneRotation.X);
-                    wasAnyRotationAppliedFatcat = true;
-                }
-                    
-                if (wasAnyRotationAppliedFatcat)
-                    dmy.Position = Vector3.Transform(new Vector3(dmy.Position.X, dmy.Position.Y, dmy.Position.Z), m).ToNumerics();
             }
         }
     }

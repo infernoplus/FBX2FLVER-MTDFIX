@@ -69,7 +69,7 @@ namespace FBX2FLVER
             //importer.JOBCONFIG.OutputTpfPath = @"C:\Program Files (x86)\Steam\steamapps\common\Dark Souls II Scholar of the First Sin\Game\model\parts\weapon\wp_1800_m-bnd\WP_1800_M.tpf";
             //importer.Import();
 
-            importer.JOBCONFIG.Preset = FBX2FLVERImportJobConfig.FlverGamePreset.DS2Skinned;
+            //importer.JOBCONFIG.Preset = FBX2FLVERImportJobConfig.FlverGamePreset.DS2Skinned;
             importer.JOBCONFIG.MTDBNDPath = @"C:\Program Files (x86)\Steam\steamapps\common\Dark Souls II Scholar of the First Sin\Game\material\allmaterialbnd.bnd";
             importer.JOBCONFIG.FBXPath = @"D:\FRPG_MOD\FBX Import Test\CJDS2TEST.FBX";
             importer.JOBCONFIG.Scale = 6.45f;

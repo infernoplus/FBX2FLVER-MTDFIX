@@ -214,6 +214,8 @@ namespace FBX2FLVER
             return fileName;
         }
 
+        
+
         public bool Import()
         {
             JOBCONFIG.ChooseGamePreset(JOBCONFIG.Preset);
@@ -330,9 +332,9 @@ namespace FBX2FLVER
 
             var topLevelBoneIndices = new List<int>();
 
-            var flverRootBoneNameMap = new Dictionary<SoulsFormats.FLVER2.Bone, string>();
+            var flverRootBoneNameMap = new Dictionary<SoulsFormats.FLVER.Bone, string>();
 
-            var dummyFollowBoneMap = new Dictionary<(string nodeName, SoulsFormats.FLVER2.Dummy dmy), string>();
+            var dummyFollowBoneMap = new Dictionary<(string nodeName, SoulsFormats.FLVER.Dummy dmy), string>();
 
             foreach (var boneContent in FBX_RootBones)
             {
@@ -384,7 +386,7 @@ namespace FBX2FLVER
             //    });
             //}
 
-            var bonesByName = new Dictionary<string, SoulsFormats.FLVER2.Bone>();
+            var bonesByName = new Dictionary<string, SoulsFormats.FLVER.Bone>();
 
             //if (ImportSkeletonPath != null)
             //{
@@ -446,7 +448,7 @@ namespace FBX2FLVER
                 var flverMesh = kvp.Key;
                 var fbxMesh = kvp.Value;
 
-                var bonesReferencedByThisMesh = new List<SoulsFormats.FLVER2.Bone>();
+                var bonesReferencedByThisMesh = new List<SoulsFormats.FLVER.Bone>();
 
                 var submeshHighQualityNormals = new List<Vector3>();
                 var submeshHighQualityTangents = new List<Vector4>();
@@ -593,9 +595,10 @@ namespace FBX2FLVER
                             {
                                 var shortTexName = GetFileNameWithoutDirectoryOrExtension(texKvp.Value.Filename);
 
-                                if (JOBCONFIG.FBXMaterialChannelMap.ContainsKey(texKvp.Key))
+                                var TextureChannelMap = FBX2FLVERLayoutHelper.getTextureMap(mtdName + ".mtd");
+                                if (TextureChannelMap.ContainsKey(texKvp.Key))
                                 {
-                                    matTextures.Add(JOBCONFIG.FBXMaterialChannelMap[texKvp.Key], shortTexName);
+                                    matTextures.Add(TextureChannelMap[texKvp.Key], shortTexName);
                                 }
                                 else
                                 {
@@ -608,7 +611,7 @@ namespace FBX2FLVER
                                     {
                                         var texBytes = File.ReadAllBytes(texKvp.Value.Filename);
                                         var texFormat = DDSHelper.GetTpfFormatFromDdsBytes(this, shortTexName, texBytes);
-                                        tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, 0, texBytes));
+                                        tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, texBytes));
                                     }
                                     else
                                     {
@@ -617,17 +620,17 @@ namespace FBX2FLVER
                                         if (texKvp.Key == "NormalMap")
                                         {
                                             var texFormat = DDSHelper.GetTpfFormatFromDdsBytes(this, shortTexName, FBX2FLVER_PLACEHOLDER_BUMPMAP);
-                                            tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, 0, FBX2FLVER_PLACEHOLDER_BUMPMAP));
+                                            tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, FBX2FLVER_PLACEHOLDER_BUMPMAP));
                                         }
                                         else if (texKvp.Key == "Specular")
                                         {
                                             var texFormat = DDSHelper.GetTpfFormatFromDdsBytes(this, shortTexName, FBX2FLVER_PLACEHOLDER_SPECULAR);
-                                            tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, 0, FBX2FLVER_PLACEHOLDER_SPECULAR));
+                                            tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, FBX2FLVER_PLACEHOLDER_SPECULAR));
                                         }
                                         else
                                         {
                                             var texFormat = DDSHelper.GetTpfFormatFromDdsBytes(this, shortTexName, FBX2FLVER_PLACEHOLDER_DIFFUSE);
-                                            tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, 0, FBX2FLVER_PLACEHOLDER_DIFFUSE));
+                                            tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, FBX2FLVER_PLACEHOLDER_DIFFUSE));
                                         }
                                     }
                                 }
@@ -635,7 +638,8 @@ namespace FBX2FLVER
                                 //TODO: OTHER TEXTURE TYPES
                             }
 
-                            foreach (var hardcodedTexturePath in JOBCONFIG.MTDHardcodedTextureChannels)
+                            var HardcodedTextureChannelMap = FBX2FLVERLayoutHelper.getHardcodedTextureMap();
+                            foreach (var hardcodedTexturePath in HardcodedTextureChannelMap)
                             {
                                 matTextures.Add(hardcodedTexturePath.Key, hardcodedTexturePath.Value);
                             }
@@ -707,6 +711,8 @@ namespace FBX2FLVER
                         }
 
                         flver.Materials.Add(placeholderGhettoMaterial);
+
+                        //var MatBufferLayout = 
 
                         //if (mtdName == null)
                         //{
@@ -785,7 +791,7 @@ namespace FBX2FLVER
                         //        });
                         //    }
                         //}
-
+                        Print("MTD :: " + mtdName);
                         for (int i = 0; i < geometryContent.Vertices.Positions.Count; i++)
                         {
                             var nextPosition = geometryContent.Vertices.Positions[i];
@@ -801,19 +807,19 @@ namespace FBX2FLVER
                             {
                                 //Position = scaledPosition
                                 Position = new System.Numerics.Vector3(posVec3.X, posVec3.Y, posVec3.Z),
-                                BoneIndices = new int[] { 0, 0, 0, 0 },
-                                BoneWeights = new float[] { 0, 0, 0, 0 },
+                                BoneIndices = new SoulsFormats.FLVER.VertexBoneIndices(),
+                                BoneWeights = new SoulsFormats.FLVER.VertexBoneWeights(),
                             };
 
-                            foreach (var memb in JOBCONFIG.BufferLayout)
+                            foreach (var memb in FBX2FLVERLayoutHelper.getLayout(mtdName + ".mtd", true))
                             {
                                 switch (memb.Semantic)
                                 {
                                     case SoulsFormats.FLVER.LayoutSemantic.Position: break;
-                                    case SoulsFormats.FLVER.LayoutSemantic.Normal: newVert.Normal = new System.Numerics.Vector4(0, 0, 0, JOBCONFIG.NormalWValue); break;
+                                    case SoulsFormats.FLVER.LayoutSemantic.Normal: newVert.Normal = new System.Numerics.Vector3(0, 0, 0); break;
                                     case SoulsFormats.FLVER.LayoutSemantic.Tangent: newVert.Tangents.Add(new System.Numerics.Vector4()); break;
-                                    case SoulsFormats.FLVER.LayoutSemantic.BoneIndices: newVert.BoneIndices = new int[] { 0, 0, 0, 0 }; break;
-                                    case SoulsFormats.FLVER.LayoutSemantic.BoneWeights: newVert.BoneWeights = new float[] { 0, 0, 0, 0 }; break;
+                                    case SoulsFormats.FLVER.LayoutSemantic.BoneIndices: newVert.BoneIndices = new SoulsFormats.FLVER.VertexBoneIndices(); break;
+                                    case SoulsFormats.FLVER.LayoutSemantic.BoneWeights: newVert.BoneWeights = new SoulsFormats.FLVER.VertexBoneWeights(); break;
                                     case SoulsFormats.FLVER.LayoutSemantic.UV:
                                         if (memb.Type == SoulsFormats.FLVER.LayoutType.UVPair)
                                             newVert.UVs.Add(new System.Numerics.Vector3());
@@ -851,7 +857,7 @@ namespace FBX2FLVER
                         ////TEST
 
                         bool hasWeights = false;
-
+                        
                         foreach (var channel in geometryContent.Vertices.Channels)
                         {
                             if (channel.Name == "Normal0")
@@ -871,12 +877,11 @@ namespace FBX2FLVER
                                         FbxPipeline.Vector3.TransformNormal(normalInputVector, normalRotMatrix)
                                         );
 
-                                    flverMesh.Vertices[i].Normal = new System.Numerics.Vector4()
+                                    flverMesh.Vertices[i].Normal = new System.Numerics.Vector3()
                                     {
                                         X = rotatedNormal.X,
                                         Y = rotatedNormal.Y,
-                                        Z = rotatedNormal.Z,
-                                        W = flverMesh.Vertices[i].Normal.W,
+                                        Z = rotatedNormal.Z
                                     };
 
 
@@ -1082,18 +1087,18 @@ namespace FBX2FLVER
                         {
                             foreach (var vert in flverMesh.Vertices)
                             {
-                                vert.BoneIndices = new int[] { 0, 0, 0, 0 };
-                                vert.BoneWeights = new float[] { 0,0,0,0 };
+                                vert.BoneIndices = new SoulsFormats.FLVER.VertexBoneIndices();
+                                vert.BoneWeights = new SoulsFormats.FLVER.VertexBoneWeights();
                                 //vert.BoneWeights = new FlverBoneWeights(0, 0, 0, 0);
 
                                 //vert.BoneWeights = new FlverBoneWeights(65535, 65535, 65535, 65535);
                                 //TODO: FIND OUT WHY AUTO MAX WEIGHT WAS TURNING OBJECT THE COLOR OF ITS NORMALS INGAME????????!!!!!!!!!!!!!!!
                             }
-                            flverMesh.Dynamic = false;
+                            flverMesh.Dynamic = 0x0;
                         }
                         else
                         {
-                            flverMesh.Dynamic = true;
+                            flverMesh.Dynamic = 0x1;
                         }
 
 
@@ -1148,22 +1153,24 @@ namespace FBX2FLVER
                     return false;
                 }
 
-                submeshHighQualityTangents = TangentSolver.SolveTangents(flverMesh, submeshVertexIndices, 
-                    submeshHighQualityNormals,
-                    submeshVertexHighQualityBasePositions,
-                    submeshVertexHighQualityBaseUVs);
-
-                for (int i = 0; i < flverMesh.Vertices.Count; i++)
+                if (submeshHighQualityTangents.Count > 0)
                 {
-                    Vector3 thingy = Vector3.Normalize(Vector3.Cross(submeshHighQualityNormals[i],
-                       new Vector3(submeshHighQualityTangents[i].X,
-                       submeshHighQualityTangents[i].Y,
-                       submeshHighQualityTangents[i].Z) * submeshHighQualityTangents[i].W));
+                    submeshHighQualityTangents = TangentSolver.SolveTangents(flverMesh, submeshVertexIndices,
+                        submeshHighQualityNormals,
+                        submeshVertexHighQualityBasePositions,
+                        submeshVertexHighQualityBaseUVs);
 
-                    flverMesh.Vertices[i].Tangents[0] = new System.Numerics.Vector4(thingy.X, thingy.Y, thingy.Z, submeshHighQualityTangents[i].W);
+                    for (int i = 0; i < flverMesh.Vertices.Count; i++)
+                    {
+                        Vector3 thingy = Vector3.Normalize(Vector3.Cross(submeshHighQualityNormals[i],
+                           new Vector3(submeshHighQualityTangents[i].X,
+                           submeshHighQualityTangents[i].Y,
+                           submeshHighQualityTangents[i].Z) * submeshHighQualityTangents[i].W));
+
+                        flverMesh.Vertices[i].Tangents[0] = new System.Numerics.Vector4(thingy.X, thingy.Y, thingy.Z, submeshHighQualityTangents[i].W);
+                    }
                 }
 
-                
 
 
                 //FBX2FLVERTODO BUFFER LAYOUTS
@@ -1217,8 +1224,7 @@ namespace FBX2FLVER
                     }
                 }
 
-
-                flverMesh.VertexBuffers.Add(new SoulsFormats.FLVER2.VertexBuffer(layoutIndex: 0));
+                flverMesh.VertexBuffers.Add(new SoulsFormats.FLVER2.VertexBuffer(layoutIndex: flverMesh.MaterialIndex));
 
                 //if (flverMesh.NameBoneIndex < 0)
                 //{
@@ -1254,11 +1260,10 @@ namespace FBX2FLVER
             {
                 foreach (var mat in flver.Materials)
                 {
-                    flver.BufferLayouts.Add(JOBCONFIG.BufferLayout);
+                    Print("MTD :: " + mat.MTD.Substring(0, mat.MTD.Length - 4));
+                    flver.BufferLayouts.Add(FBX2FLVERLayoutHelper.getLayout(mat.MTD.Substring(0, mat.MTD.Length-4) + ".mtd", true));
                 }
             }
-
-            
 
             flver.Header.Unk5C = JOBCONFIG.Unk0x5CValue;
             flver.Header.Unk68 = JOBCONFIG.Unk0x68Value;
@@ -1380,5 +1385,6 @@ namespace FBX2FLVER
         //        }
         //    }
         //}
+
     }
 }

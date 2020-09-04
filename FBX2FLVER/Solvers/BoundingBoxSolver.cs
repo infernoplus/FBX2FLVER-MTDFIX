@@ -16,16 +16,17 @@ namespace FBX2FLVER.Solvers
             this.Importer = Importer;
         }
 
-        private Dictionary<FLVER.Vertex, List<FLVER2.Bone>> PrecalculatedBoneLists = new Dictionary<FLVER.Vertex, List<FLVER2.Bone>>();
+        private Dictionary<FLVER.Vertex, List<FLVER.Bone>> PrecalculatedBoneLists = new Dictionary<FLVER.Vertex, List<FLVER.Bone>>();
 
-        private List<FLVER2.Bone> GetAllBonesReferencedByVertex(FLVER2 f, FLVER2.Mesh m, FLVER.Vertex v)
+        private List<FLVER.Bone> GetAllBonesReferencedByVertex(FLVER2 f, FLVER2.Mesh m, FLVER.Vertex v)
         {
             if (!PrecalculatedBoneLists.ContainsKey(v))
             {
-                List<FLVER2.Bone> result = new List<FLVER2.Bone>();
+                List<FLVER.Bone> result = new List<FLVER.Bone>();
 
-                foreach (var vertBoneIndex in v.BoneIndices)
+                for (var i=0;i<v.BoneIndices.Length;i++)
                 {
+                    var vertBoneIndex = v.BoneIndices[i];
                     if (vertBoneIndex >= 0)
                     {
                         if (Importer.JOBCONFIG.UseDirectBoneIndices)
@@ -46,7 +47,7 @@ namespace FBX2FLVER.Solvers
             return PrecalculatedBoneLists[v];
         }
 
-        private List<FLVER.Vertex> GetVerticesParentedToBone(FLVER2 f, FLVER2.Bone b)
+        private List<FLVER.Vertex> GetVerticesParentedToBone(FLVER2 f, FLVER.Bone b)
         {
             var result = new List<FLVER.Vertex>();
             foreach (var sm in f.Meshes)
@@ -69,9 +70,9 @@ namespace FBX2FLVER.Solvers
                 return new BoundingBox(Vector3.Zero, Vector3.Zero);
         }
 
-        Matrix GetParentBoneMatrix(FLVER2 f, FLVER2.Bone bone)
+        Matrix GetParentBoneMatrix(FLVER2 f, FLVER.Bone bone)
         {
-            FLVER2.Bone parent = bone;
+            FLVER.Bone parent = bone;
 
             var boneParentMatrix = Matrix.Identity;
 
@@ -102,7 +103,7 @@ namespace FBX2FLVER.Solvers
             return boneParentMatrix;
         }
 
-        private void SetBoneBoundingBox(FLVER2 f, FLVER2.Bone b)
+        private void SetBoneBoundingBox(FLVER2 f, FLVER.Bone b)
         {
             var bb = GetBoundingBox(GetVerticesParentedToBone(f, b).Select(v => new Vector3(v.Position.X, v.Position.Y, v.Position.Z)).ToList());
             if (bb.Max.LengthSquared() != 0 || bb.Min.LengthSquared() != 0)

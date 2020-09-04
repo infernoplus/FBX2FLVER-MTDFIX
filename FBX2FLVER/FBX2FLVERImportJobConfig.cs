@@ -52,7 +52,7 @@ namespace FBX2FLVER
 
         public bool UseAbsoluteVertPositions { get; set; } = true;
 
-        public SoulsFormats.FLVER2.BufferLayout BufferLayout = null;
+        public SoulsFormats.FLVER2.BufferLayout BufferLayout = null; /* DEPRECATED :: Use FBX2FLVERLayoutHelper.getLayout */
 
         public bool GenerateLodAndMotionBlur = false;
 
@@ -90,14 +90,14 @@ namespace FBX2FLVER
         public byte TpfEncoding = 2;
         public byte TpfFlag2 = 3;
 
-        public Dictionary<string, string> FBXMaterialChannelMap = new Dictionary<string, string>()
+        public Dictionary<string, string> FBXMaterialChannelMap = new Dictionary<string, string>() /* DEPRECATED :: Use FBX2FLVERLayoutHelper.getTextureMap */
         {
             { "Texture", "g_Diffuse" },
             { "Specular", "g_Specular" },
             { "NormalMap", "g_Bumpmap" },
         };
 
-        public Dictionary<string, string> MTDHardcodedTextureChannels = new Dictionary<string, string>()
+        public Dictionary<string, string> MTDHardcodedTextureChannels = new Dictionary<string, string>() /* DEPRECATED :: Use FBX2FLVERLayoutHelper.getHardcodedTextureMap */
         {
             { "g_DetailBumpmap", "" },
         };
@@ -106,10 +106,10 @@ namespace FBX2FLVER
         {
             DS1Static,
             DS1Skinned,
-            DS2Static,
+            /*DS2Static,
             DS2Skinned,
             DS3Static,
-            DS3Skinned,
+            DS3Skinned,*/  // DEPRECATED :: would need a Material Info json file for each game to make these works too
         };
 
 
@@ -205,7 +205,7 @@ namespace FBX2FLVER
                     FakeTextureDirectory = "";
 
                     break;
-                case FlverGamePreset.DS2Static:
+/*                case FlverGamePreset.DS2Static:
                     Member(MBT.Float3, MBS.Position);
                     Member(MBT.Byte4B, MBS.Normal);
                     Member(MBT.Byte4B, MBS.Tangent);
@@ -335,7 +335,7 @@ namespace FBX2FLVER
 
                     FakeTextureDirectory = "";
 
-                    break;
+                    break;*/
                 default:
                     throw new NotImplementedException();
             }
