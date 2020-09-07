@@ -10,10 +10,10 @@ Improperly exported FBX files will likely crash the tool with no warning.
 Most notably, if your MTD name is wrong it will just explode. Please be careful.
 
 ## Texture Info
-Diffuse -> Diffuse
-Specular Color -> Specular
-Normal Bump -> Bump                        **(You must specifically use a 'Normal Bump' map and then attach your normal texture to that)*
-Self Illumination (Emmisive) -> Lightmap
+* Diffuse -> Diffuse
+* Specular Color -> Specular
+* Normal Bump -> Bump                        **(You must specifically use a 'Normal Bump' map and then attach your normal texture to that)*
+* Self-Illumination/Emmisive -> Lightmap
 
 Tested with 3DS Max 2015. Best of luck Blender boys~
 
