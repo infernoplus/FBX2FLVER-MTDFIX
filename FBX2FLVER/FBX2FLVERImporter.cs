@@ -997,6 +997,14 @@ namespace FBX2FLVER
                                     }
                                 }
                             }
+                            else if (channel.Name == "Color0") // I don't think I need suppport for any more channels. Probably.
+                            {
+                                for(int i = 0; i < flverMesh.Vertices.Count; i++)
+                                {
+                                    var channelValue = (FbxPipeline.Vector4)channel[i];
+                                    flverMesh.Vertices[i].Colors[0] = new SoulsFormats.FLVER.VertexColor(channelValue.Z, channelValue.X, channelValue.Y, channelValue.W);
+                                }
+                            }
                             else if (channel.Name == "Weights0")
                             {
                                 hasWeights = true;
