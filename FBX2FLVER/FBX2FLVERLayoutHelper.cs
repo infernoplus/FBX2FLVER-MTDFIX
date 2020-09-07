@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics;
+using System.Collections;
 
 namespace FBX2FLVER
 {
@@ -28,8 +29,8 @@ namespace FBX2FLVER
             SoulsFormats.FLVER2.BufferLayout BL = new SoulsFormats.FLVER2.BufferLayout();
             for (int i = 0; i < MTD_LAYOUT_MEMBERS.Count; i++)
             {
-                MBT mbt = (MBT)int.Parse(MTD_LAYOUT_MEMBERS[i]["Type"].ToString());
-                MBS mbs = (MBS)int.Parse(MTD_LAYOUT_MEMBERS[i]["Semantic"].ToString());
+                MBT mbt = (MBT)uint.Parse(MTD_LAYOUT_MEMBERS[i]["Type"].ToString());
+                MBS mbs = (MBS)uint.Parse(MTD_LAYOUT_MEMBERS[i]["Semantic"].ToString());
                 if(isStatic && mbs == MBS.BoneWeights) { continue; }
                 BL.Add(new SoulsFormats.FLVER.LayoutMember(mbt, mbs));
             }
@@ -37,7 +38,7 @@ namespace FBX2FLVER
             return BL;
         }
 
-        public static Dictionary<string, string> getTextureMap(string MTDName)
+        public static List<TextureKey> getTextureMap(string MTDName)
         {
             if (MTD_INFO_LIST == null)
             {
@@ -46,31 +47,30 @@ namespace FBX2FLVER
 
             JObject MTD_INFO = getMTDInfo(MTDName);
             JArray MTD_TEXTURE_MEMBERS = (JArray)MTD_INFO["TextureMembers"];
-
-            Dictionary<string, string> TM = new Dictionary<string, string>();
-            for(int i=0;i<MTD_TEXTURE_MEMBERS.Count; i++)
+            List<TextureKey> TM = new List<TextureKey>();
+            for (int i=0;i<MTD_TEXTURE_MEMBERS.Count; i++)
             {
                 string TexMem = MTD_TEXTURE_MEMBERS[i].ToString();
                 switch (TexMem)
                 {
-                    case "g_Diffuse": TM.Add("Texture", TexMem);  break;
-                    case "g_Diffuse_2": TM.Add("", TexMem); break;
-                    case "g_Specular": TM.Add("Specular", TexMem); break;
-                    case "g_Specular_2": TM.Add("", TexMem); break;
-                    case "g_Bumpmap": TM.Add("NormalMap", TexMem); break;
-                    case "g_Bumpmap_2": TM.Add("", TexMem); break;
-                    case "g_Envmap": TM.Add("", TexMem); break;
-                    case "g_Lightmap": TM.Add("", TexMem); break;
+                    case "g_Diffuse": TM.Add(new TextureKey("Texture", TexMem, 0x1, true));  break;
+                    case "g_Diffuse_2": TM.Add(new TextureKey("", TexMem, 0x1, true)); break;
+                    case "g_Specular": TM.Add(new TextureKey("Specular", TexMem, 0x1, true)); break;
+                    case "g_Specular_2": TM.Add(new TextureKey("", TexMem, 0x1, true)); break;
+                    case "g_Bumpmap": TM.Add(new TextureKey("NormalMap", TexMem, 0x1, true)); break;
+                    case "g_Bumpmap_2": TM.Add(new TextureKey("", TexMem, 0x1, true)); break;
+                    case "g_Envmap": TM.Add(new TextureKey("", TexMem, 0x1, true)); break;
+                    case "g_Lightmap": TM.Add(new TextureKey("Emissive", TexMem, 0x1, true)); break;
                     default: break;
                 }
             }
             return TM;
         }
 
-        public static Dictionary<string, string> getHardcodedTextureMap()
+        public static List<TextureKey> getHardcodedTextureMap()
         {
-            Dictionary<string, string> TM = new Dictionary<string, string>();
-            TM.Add("g_DetailBumpmap", "");
+            List<TextureKey> TM = new List<TextureKey>();
+            TM.Add(new TextureKey("g_DetailBumpmap", "", 0x0, false));
             return TM;
         }
 
@@ -102,6 +102,17 @@ namespace FBX2FLVER
 
             JObject json = JObject.Parse(data);
             MTD_INFO_LIST = (JArray)json["mtds"];
+        }
+    }
+
+    public class TextureKey
+    {
+        public string Key, Value;
+        public byte Unk10;
+        public bool Unk11;
+        public TextureKey(string k, string v, byte u, bool uu)
+        {
+            Key = k; Value = v; Unk10 = u; Unk11 = uu;
         }
     }
 }

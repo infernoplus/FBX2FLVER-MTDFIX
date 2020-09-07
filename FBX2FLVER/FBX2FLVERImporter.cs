@@ -516,7 +516,7 @@ namespace FBX2FLVER
                         string matName = null;
                         string mtdName = null;
 
-                        Dictionary<string, string> matTextures = new Dictionary<string, string>();
+                        List<TextureKey> matTextures = new List<TextureKey>();
 
                         //if (materialOverrides.Any())
                         //{
@@ -591,14 +591,71 @@ namespace FBX2FLVER
                                 }
                             }
 
-                            foreach (var texKvp in geometryContent.Material.Textures)
+                            Print("Mesh MTD :: " + mtdName);
+
+                            /* Reworked this so that it preserves the TextureMember order. The order that the textures are written to the material matters!" */
+                            var TextureChannelMap = FBX2FLVERLayoutHelper.getTextureMap(mtdName + ".mtd");
+                            foreach (var TEX in TextureChannelMap)
+                            {
+                                KeyValuePair<string, ExternalReference<TextureContent>> texKvp = new KeyValuePair<string, ExternalReference<TextureContent>>(null, null); //???? C# why the fuck even ??????????
+                                foreach (var boop in geometryContent.Material.Textures)
+                                {
+                                    if (boop.Key.Equals(TEX.Key)) { texKvp = boop; break; }
+                                }
+
+                                if (texKvp.Key == null)
+                                { 
+                                    PrintWarning($"FBX material texture channel \"{TEX.Value}\" was not mapped to an ingame texture channel. I'm gonna crash now. Bye!");
+                                }
+
+                                var shortTexName = GetFileNameWithoutDirectoryOrExtension(texKvp.Value.Filename);
+                                matTextures.Add(new TextureKey(TEX.Value, shortTexName, TEX.Unk10, TEX.Unk11));
+
+                                if (!tpf.Textures.Any(t => t.Name == shortTexName))
+                                {
+                                    if (File.Exists(texKvp.Value.Filename))
+                                    {
+                                        var texBytes = File.ReadAllBytes(texKvp.Value.Filename);
+                                        var texFormat = DDSHelper.GetTpfFormatFromDdsBytes(this, shortTexName, texBytes);
+                                        tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, texBytes));
+                                    }
+                                    else
+                                    {
+                                        PrintWarning($"Texture file \"{texKvp.Value.Filename}\" did not exist. Using placeholder");
+
+                                        if (texKvp.Key == "NormalMap")
+                                        {
+                                            var texFormat = DDSHelper.GetTpfFormatFromDdsBytes(this, shortTexName, FBX2FLVER_PLACEHOLDER_BUMPMAP);
+                                            tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, FBX2FLVER_PLACEHOLDER_BUMPMAP));
+                                        }
+                                        else if (texKvp.Key == "Specular")
+                                        {
+                                            var texFormat = DDSHelper.GetTpfFormatFromDdsBytes(this, shortTexName, FBX2FLVER_PLACEHOLDER_SPECULAR);
+                                            tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, FBX2FLVER_PLACEHOLDER_SPECULAR));
+                                        }
+                                        else
+                                        {
+                                            var texFormat = DDSHelper.GetTpfFormatFromDdsBytes(this, shortTexName, FBX2FLVER_PLACEHOLDER_DIFFUSE);
+                                            tpf.Textures.Add(new SoulsFormats.TPF.Texture(shortTexName, (byte)texFormat, 0, FBX2FLVER_PLACEHOLDER_DIFFUSE));
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            /*foreach (var texKvp in geometryContent.Material.Textures)
                             {
                                 var shortTexName = GetFileNameWithoutDirectoryOrExtension(texKvp.Value.Filename);
 
                                 var TextureChannelMap = FBX2FLVERLayoutHelper.getTextureMap(mtdName + ".mtd");
-                                if (TextureChannelMap.ContainsKey(texKvp.Key))
+                                TextureKey findTex = null;
+                                for(int i=0;i<TextureChannelMap.Count;i++)
                                 {
-                                    matTextures.Add(TextureChannelMap[texKvp.Key], shortTexName);
+                                    if(TextureChannelMap[i].Key.Equals(texKvp.Key)) { findTex = TextureChannelMap[i]; break; }
+                                }
+
+                                if (findTex != null)
+                                {
+                                    matTextures.Add(new TextureKey(findTex.Value, shortTexName));
                                 }
                                 else
                                 {
@@ -636,12 +693,12 @@ namespace FBX2FLVER
                                 }
 
                                 //TODO: OTHER TEXTURE TYPES
-                            }
+                            }*/
 
                             var HardcodedTextureChannelMap = FBX2FLVERLayoutHelper.getHardcodedTextureMap();
                             foreach (var hardcodedTexturePath in HardcodedTextureChannelMap)
                             {
-                                matTextures.Add(hardcodedTexturePath.Key, hardcodedTexturePath.Value);
+                                matTextures.Add(new TextureKey(hardcodedTexturePath.Key, hardcodedTexturePath.Value, hardcodedTexturePath.Unk10, hardcodedTexturePath.Unk11));
                             }
                         }
                         else
@@ -673,7 +730,13 @@ namespace FBX2FLVER
 
                         foreach (var tex in mtdRequiredTextures)
                         {
-                            if (!matTextures.ContainsKey(tex))
+                            TextureKey findTexB = null;
+                            for (int i = 0; i < matTextures.Count; i++)
+                            {
+                                if (matTextures[i].Key.Equals(tex)) { findTexB = matTextures[i]; break; }
+                            }
+
+                            if (findTexB == null)
                             {
                                 mtdMissingTextures.Add(tex);
                             }
@@ -705,7 +768,7 @@ namespace FBX2FLVER
 
                         foreach (var thing in matTextures)
                         {
-                            placeholderGhettoMaterial.Textures.Add(new SoulsFormats.FLVER2.Texture(thing.Key, JOBCONFIG.FakeTextureDirectory + thing.Value, System.Numerics.Vector2.One, 1, true, 0, 0, 0));
+                            placeholderGhettoMaterial.Textures.Add(new SoulsFormats.FLVER2.Texture(thing.Key, JOBCONFIG.FakeTextureDirectory + thing.Value, System.Numerics.Vector2.One, thing.Unk10, thing.Unk11, 0, 0, 0));
                             //placeholderGhettoMaterial.GXIndex = flverMesh.MaterialIndex;
                             //flver.GXLists.Add(new List<SoulsFormats.FLVER.GXItem>() { new SoulsFormats.FLVER.GXItem(0, 0, new byte[] { 1, 0, 0, 0, 102, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 100, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 101, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 102, 0, 0, 0, 101, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 101, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 127, 100, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) });
                         }
@@ -791,7 +854,7 @@ namespace FBX2FLVER
                         //        });
                         //    }
                         //}
-                        Print("MTD :: " + mtdName);
+
                         for (int i = 0; i < geometryContent.Vertices.Positions.Count; i++)
                         {
                             var nextPosition = geometryContent.Vertices.Positions[i];
@@ -811,7 +874,7 @@ namespace FBX2FLVER
                                 BoneWeights = new SoulsFormats.FLVER.VertexBoneWeights(),
                             };
 
-                            foreach (var memb in FBX2FLVERLayoutHelper.getLayout(mtdName + ".mtd", true))
+                            foreach (var memb in FBX2FLVERLayoutHelper.getLayout(mtdName + ".mtd", JOBCONFIG.IsStatic))
                             {
                                 switch (memb.Semantic)
                                 {
@@ -822,7 +885,9 @@ namespace FBX2FLVER
                                     case SoulsFormats.FLVER.LayoutSemantic.BoneWeights: newVert.BoneWeights = new SoulsFormats.FLVER.VertexBoneWeights(); break;
                                     case SoulsFormats.FLVER.LayoutSemantic.UV:
                                         if (memb.Type == SoulsFormats.FLVER.LayoutType.UVPair)
+                                        {
                                             newVert.UVs.Add(new System.Numerics.Vector3());
+                                        }
                                         newVert.UVs.Add(new System.Numerics.Vector3());
                                         break;
                                     case SoulsFormats.FLVER.LayoutSemantic.VertexColor: newVert.Colors.Add(new SoulsFormats.FLVER.VertexColor(255, 255, 255, 255)); break;
@@ -1254,16 +1319,53 @@ namespace FBX2FLVER
 
             if (JOBCONFIG.OnlyCreate1BufferLayout)
             {
-                flver.BufferLayouts.Add(JOBCONFIG.BufferLayout);
+                //flver.BufferLayouts.Add(JOBCONFIG.BufferLayout);
+                Print("Unsupported!");
             }
             else
             {
                 foreach (var mat in flver.Materials)
                 {
-                    Print("MTD :: " + mat.MTD.Substring(0, mat.MTD.Length - 4));
-                    flver.BufferLayouts.Add(FBX2FLVERLayoutHelper.getLayout(mat.MTD.Substring(0, mat.MTD.Length-4) + ".mtd", true));
+                    flver.BufferLayouts.Add(FBX2FLVERLayoutHelper.getLayout(mat.MTD, JOBCONFIG.IsStatic));
                 }
             }
+
+            /*Print("===============================");
+            for(int i=0;i<flver.Meshes.Count;i++)
+            {
+                Print("Mesh::" + i);
+                Print("    ::MaterialIndex=" + flver.Meshes[i].MaterialIndex);
+                for (int j=0;j<flver.Meshes[i].VertexBuffers.Count;j++)
+                {
+                    Print("    ::VertexBuffer::" + j);
+                    Print("                  ::BufferLayoutIndex=" + flver.Meshes[i].VertexBuffers[j].LayoutIndex);
+                }
+            }
+            Print("===============================");
+            for(int i=0;i<flver.BufferLayouts.Count;i++)
+            {
+                Print("BufferLayout::" + i);
+                Print("            ::Count=" + flver.BufferLayouts[i].Count);
+                Print("            ::Size=" + flver.BufferLayouts[i].Size);
+            }
+            Print("===============================");
+            for (int i = 0; i < flver.Materials.Count; i++)
+            {
+                Print("Material::" + i);
+                Print("        ::MTD=" + flver.Materials[i].MTD);
+                Print("        ::Name=" + flver.Materials[i].Name);
+                Print("        ::GXIndex=" + flver.Materials[i].GXIndex);
+                Print("        ::Textures::");
+                for (int j=0;j<flver.Materials[i].Textures.Count;j++)
+                {
+                    Print("                  ::" + flver.Materials[i].Textures[j].Path);
+                }
+            }
+            for(int i=0; i<flver.GXLists.Count;i++)
+            {
+                Print("GXList::" + i);
+                Print("      ::Count=" + flver.GXLists[i].Count);
+            }*/
 
             flver.Header.Unk5C = JOBCONFIG.Unk0x5CValue;
             flver.Header.Unk68 = JOBCONFIG.Unk0x68Value;

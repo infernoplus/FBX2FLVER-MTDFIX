@@ -65,6 +65,8 @@ namespace FBX2FLVER
 
         public bool OnlyCreate1BufferLayout = false;
 
+        public bool IsStatic = false;
+
         public float NormalWValue = 0;
 
         public float UVScaleX = 1;
@@ -164,6 +166,8 @@ namespace FBX2FLVER
                     TpfEncoding = 2;
                     TpfFlag2 = 3;
 
+                    IsStatic = true;
+
                     NormalWValue = 0;
                     UVScaleX = 1;
                     UVScaleY = 1;
@@ -193,6 +197,8 @@ namespace FBX2FLVER
                     FlverVersion = 0x2000C;
                     TpfEncoding = 2;
                     TpfFlag2 = 3;
+
+                    IsStatic = false;
 
                     NormalWValue = 0;
                     UVScaleX = 1;
