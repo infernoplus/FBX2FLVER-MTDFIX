@@ -14,7 +14,7 @@ https://github.com/Meowmaritus/FBX2FLVER
 ## Main Changes
 * Will properly import meshes using any of the stock MTDs in DS1
 * Will import vertex color and alpha
-* Will import multiple UV channels (channel 2 is used for *[*][M] materials, and channel 3 is for lightmaps *[L])
+* Will import multiple UV channels (channel 2 is used for *[M] materials, and channel 3 is for lightmaps *[L])
 * Will generate a seperate TPF for each material in your FBX, and with the proper naming convention for MapPieces (place them in map/tx/**)
 
 ## Texture Info
