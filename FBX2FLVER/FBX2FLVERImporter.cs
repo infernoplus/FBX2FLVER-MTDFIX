@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using FbxPipeline = PIPE::Microsoft.Xna.Framework;
 
 namespace FBX2FLVER
@@ -1002,7 +1003,8 @@ namespace FBX2FLVER
                                 for(int i = 0; i < flverMesh.Vertices.Count; i++)
                                 {
                                     var channelValue = (FbxPipeline.Vector4)channel[i];
-                                    flverMesh.Vertices[i].Colors[0] = new SoulsFormats.FLVER.VertexColor(channelValue.Z, channelValue.X, channelValue.Y, channelValue.W);
+                                    flverMesh.Vertices[i].Colors[0] = new SoulsFormats.FLVER.VertexColor(channelValue.W, channelValue.X, channelValue.Y, channelValue.Z);
+                                    //Print(channelValue.X + ", " + channelValue.Y + ", " + channelValue.Z + ", " + channelValue.W);
                                 }
                             }
                             else if (channel.Name == "Weights0")

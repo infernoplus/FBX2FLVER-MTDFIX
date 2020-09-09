@@ -14,8 +14,12 @@ Most notably, if your MTD name is wrong it will just explode. Please be careful.
 * Specular Color -> Specular
 * Normal Bump -> Bump                        **(You must specifically use a 'Normal Bump' map and then attach your normal texture to that)*
 * Self-Illumination/Emmisive -> Lightmap
+* Transparency/Opacity -> EnvMap
+* Specular Level/Specular Factor -> Diffuse2        **(Diffuse2, Specular2 and Bump2 are used by multi mats like M[DB][M] and are controlled by vertex color)
+* Glossiness / Specular Power -> Specular2
+* Reflection -> Bump2                               **(Just pipe the normal texture directly into the Reflection channel. Don't use a 'Normal Bump' map here.)*
 
-Tested with 3DS Max 2015. Best of luck Blender boys~
+If you are missing a texture the import will fail. Tested with 3DS Max 2015. Best of luck Blender boys~
 
 ## Some notes:
 * For FLVER/TPF paths ***you can select a .CHRBND.DCX, .TEXBND.DCX, .BND.DCX etc and then select the file inside! WAY EASIER PLEASE USE THIS METHOD I'M BEGGING YOU DON'T EXTRACT THEN IMPORT TO LOOSE FILES AND REPACK I'M BEGGING YOU PLEASE SAVE YOURSELF FROM THIS NONSENSE AND SELECT A BND! A BND FILE!!!!!!***

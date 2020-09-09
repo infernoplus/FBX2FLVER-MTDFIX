@@ -54,12 +54,12 @@ namespace FBX2FLVER
                 switch (TexMem)
                 {
                     case "g_Diffuse": TM.Add(new TextureKey("Texture", TexMem, 0x1, true));  break;
-                    case "g_Diffuse_2": TM.Add(new TextureKey("", TexMem, 0x1, true)); break;
+                    case "g_Diffuse_2": TM.Add(new TextureKey("SpecularFactor", TexMem, 0x1, true)); break;
                     case "g_Specular": TM.Add(new TextureKey("Specular", TexMem, 0x1, true)); break;
-                    case "g_Specular_2": TM.Add(new TextureKey("", TexMem, 0x1, true)); break;
+                    case "g_Specular_2": TM.Add(new TextureKey("SpecularPower", TexMem, 0x1, true)); break;
                     case "g_Bumpmap": TM.Add(new TextureKey("NormalMap", TexMem, 0x1, true)); break;
-                    case "g_Bumpmap_2": TM.Add(new TextureKey("", TexMem, 0x1, true)); break;
-                    case "g_Envmap": TM.Add(new TextureKey("", TexMem, 0x1, true)); break;
+                    case "g_Bumpmap_2": TM.Add(new TextureKey("Reflection", TexMem, 0x1, true)); break;
+                    case "g_Envmap": TM.Add(new TextureKey("Transparency", TexMem, 0x1, true)); break;
                     case "g_Lightmap": TM.Add(new TextureKey("Emissive", TexMem, 0x1, true)); break;
                     default: break;
                 }
