@@ -10,12 +10,17 @@ https://github.com/Meowmaritus/FBX2FLVER
 * Improperly exported FBX files will likely crash the tool with no warning.
 * Most notably, if your MTD name is wrong it will just explode. Please be careful.
 * Materials without textures would probably explode, I don't think there are any in DS1 though.
+* Due to the way the import process works, Vertex Coordinates are imported in 'order'. Diffuse first, Diffuse_2 second, Lightmap third. If you use a material that has only Diffuse and Lightmap then Lightmap UV chanel will be imported from UV channel 2 in the FBX. If your MTD uses all 3 UV channels then Lightmap will be channel 3.
+* FBX is weird and will only export UV Channels past 1 if you have an active UVW Unwrap modifier on that channel with all the faces selected. Do not collapse your UVW Unwrap modifiers!
 
 ## Main Changes
 * Will properly import meshes using any of the stock MTDs in DS1
 * Will import vertex color and alpha
-* Will import multiple UV channels (channel 2 is used for *[M] materials, and channel 3 is for lightmaps *[L])
+* Will import multiple UV channels (channel 2 is used for *[M] materials, and channel 3 is for lightmaps *[L]) ** NOT 100% TRUE READ ABOVE
 * Will generate a seperate TPF for each material in your FBX, and with the proper naming convention for MapPieces (place them in map/tx/**)
+
+## Notes
+
 
 ## Texture Info
 * Diffuse -> Diffuse
