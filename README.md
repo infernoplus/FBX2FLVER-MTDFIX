@@ -1,4 +1,4 @@
-# FBX2FLVER
+# FBX2FLVER - MTD Wizard Edition
 Experimental FBX model importer for Dark Souls 1.
 Supports every single MTD in the base game. (Probably!***)
 Made for importing MapPieces mainly. But could be used for other things probably.
