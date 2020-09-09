@@ -145,13 +145,14 @@ namespace FBX2FLVER
             var browseDialog = new OpenFileDialog()
             {
                 Filter = "All Files (*.*)|*.*",
-                Title = "Choose where to save TPF Textures (supports saving inside BNDs)",
+                Title = "Select folder to output various TPF files to. (Select a file in the folder)",
                 CheckFileExists = false,
             };
 
             if (browseDialog.ShowDialog() == true)
             {
-                if ((browseDialog.FileName.ToUpper().EndsWith(".TPF") || browseDialog.FileName.ToUpper().EndsWith(".TPF.DCX")) && 
+                TextBoxTPFOutputMain.Text = browseDialog.FileName.Substring(0, browseDialog.FileName.LastIndexOf('\\')+1);
+                /*(if ((browseDialog.FileName.ToUpper().EndsWith(".TPF") || browseDialog.FileName.ToUpper().EndsWith(".TPF.DCX")) && 
                     File.Exists(browseDialog.FileName))
                 {
                     TextBoxTPFOutputMain.Text = browseDialog.FileName;
@@ -160,7 +161,7 @@ namespace FBX2FLVER
                 {
                     var loadedFile = SFHelper.ReadFile<TPF>(this, browseDialog.FileName);
                     TextBoxTPFOutputMain.Text = loadedFile.Uri;
-                }
+                }*/
             }
         }
 

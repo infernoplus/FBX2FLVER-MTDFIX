@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using PIPE::Microsoft.Xna.Framework.Content.Pipeline;
 using PIPE::Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using SoulsFormats;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -224,21 +225,27 @@ namespace FBX2FLVER
             var flver = new SoulsFormats.FLVER2();
             flver.Header.Version = JOBCONFIG.FlverVersion;
 
-            var tpf = new SoulsFormats.TPF();
+            /*var tpf = new SoulsFormats.TPF();
             tpf.Encoding = JOBCONFIG.TpfEncoding;
-            tpf.Flag2 = JOBCONFIG.TpfFlag2;
+            tpf.Flag2 = JOBCONFIG.TpfFlag2;*/
 
-            bool result = ImportToFlver(flver, tpf);
+            List<SoulsFormats.TPF> tpfs = new List<SoulsFormats.TPF>();
+
+            bool result = ImportToFlver(flver, tpfs);
 
             if (result)
             {
-                if (JOBCONFIG.BeforeSaveAction != null)
+                /*if (JOBCONFIG.BeforeSaveAction != null)
                 {
-                    JOBCONFIG.BeforeSaveAction.Invoke(flver, tpf);
-                }
+                    //JOBCONFIG.BeforeSaveAction.Invoke(flver, tpf);  // ?? I literally have no idea what this does
+                }*/
 
                 SFHelper.WriteFile(flver, JOBCONFIG.OutputFlverPath);
-                SFHelper.WriteFile(tpf, JOBCONFIG.OutputTpfPath);
+                foreach (var tpf in tpfs)
+                {
+                    if (tpf.Textures.Count < 1) { continue; }
+                    SFHelper.WriteFile(tpf, JOBCONFIG.OutputTpfPath + "\\" + tpf.Textures[0].Name + ".tpf");
+                }
             }
 
             OnImportEnding();
@@ -248,7 +255,7 @@ namespace FBX2FLVER
 
         
 
-        private bool ImportToFlver(SoulsFormats.FLVER2 flver, SoulsFormats.TPF tpf)
+        private bool ImportToFlver(SoulsFormats.FLVER2 flver, List<SoulsFormats.TPF> tpfs)
         {
             OnImportStarted();
 
@@ -270,7 +277,7 @@ namespace FBX2FLVER
                 return false;
             }
 
-            if (!LoadFbxIntoFlver(fbx, flver, flverMeshNameMap, tpf))
+            if (!LoadFbxIntoFlver(fbx, flver, flverMeshNameMap, tpfs))
             {
                 PrintError("Import failed.");
                 return false;
@@ -282,7 +289,7 @@ namespace FBX2FLVER
             }
         }
 
-        bool LoadFbxIntoFlver(NodeContent fbx, SoulsFormats.FLVER2 flver, Dictionary<SoulsFormats.FLVER2.Mesh, string> flverSubmeshNameMap, SoulsFormats.TPF tpf)
+        bool LoadFbxIntoFlver(NodeContent fbx, SoulsFormats.FLVER2 flver, Dictionary<SoulsFormats.FLVER2.Mesh, string> flverSubmeshNameMap, List<SoulsFormats.TPF> tpfs)
         {
             var FBX_Bones = new List<NodeContent>();
             var FBX_RootBones = new List<NodeContent>();
@@ -592,7 +599,11 @@ namespace FBX2FLVER
                                 }
                             }
 
-                            Print("Mesh MTD :: " + mtdName);
+                            Print("Mesh::" + matName + " | MTD::" + mtdName);
+                            var tpf = new SoulsFormats.TPF();
+                            tpf.Encoding = JOBCONFIG.TpfEncoding;
+                            tpf.Flag2 = JOBCONFIG.TpfFlag2;
+                            tpfs.Add(tpf);
 
                             /* Reworked this so that it preserves the TextureMember order. The order that the textures are written to the material matters!" */
                             var TextureChannelMap = FBX2FLVERLayoutHelper.getTextureMap(mtdName + ".mtd");

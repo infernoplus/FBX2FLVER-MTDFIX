@@ -49,7 +49,7 @@
         <TextBox Name="TextBoxFLVEROutputMain" Grid.Column="2" Grid.Row="3" VerticalContentAlignment="Center"/>
         <Button Name="ButtonBrowseFLVEROutputMain" Grid.Column="3" Grid.Row="3" Content="Browse" Click="ButtonBrowseFLVEROutputMain_Click"/>
 
-        <Label Grid.Column="0" Grid.Row="4" Content=".TPF (Textures) Output Path:" VerticalContentAlignment="Center" FontWeight="Bold" Padding="0" HorizontalContentAlignment="Right" Margin="8,0,8,0" />
+        <Label Grid.Column="0" Grid.Row="4" Content=".TPF(s) (Textures) Output Folder:" VerticalContentAlignment="Center" FontWeight="Bold" Padding="0" HorizontalContentAlignment="Right" Margin="8,0,8,0" />
         <TextBox Name="TextBoxTPFOutputMain" Grid.Column="2" Grid.Row="4" VerticalContentAlignment="Center"/>
         <Button Name="ButtonBrowseTPFOutputMain" Grid.Column="3" Grid.Row="4" Content="Browse" Click="ButtonBrowseTPFOutputMain_Click"/>
 

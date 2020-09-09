@@ -27,7 +27,7 @@ namespace FBX2FLVER
         }
 
         public string OutputFlverPath { get; set; } = null;
-        public string OutputTpfPath { get; set; } = null;
+        public string OutputTpfPath { get; set; } = null;   // Points to a folder now
 
         public double Scale { get; set; } = 1.0;
 

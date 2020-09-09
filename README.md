@@ -1,13 +1,21 @@
 # FBX2FLVER
 Experimental FBX model importer for Dark Souls 1.
 Supports every single MTD in the base game. (Probably!***)
+Made for importing MapPieces mainly. But could be used for other things probably.
 
 Originally created by Meowartimus.
 https://github.com/Meowmaritus/FBX2FLVER
 
 ## Broked Stuff
-Improperly exported FBX files will likely crash the tool with no warning.
-Most notably, if your MTD name is wrong it will just explode. Please be careful.
+* Improperly exported FBX files will likely crash the tool with no warning.
+* Most notably, if your MTD name is wrong it will just explode. Please be careful.
+* Materials without textures would probably explode, I don't think there are any in DS1 though.
+
+## Main Changes
+* Will properly import meshes using any of the stock MTDs in DS1
+* Will import vertex color and alpha
+* Will import multiple UV channels (channel 2 is used for *[*][M] materials, and channel 3 is for lightmaps *[L])
+* Will generate a seperate TPF for each material in your FBX, and with the proper naming convention for MapPieces (place them in map/tx/**)
 
 ## Texture Info
 * Diffuse -> Diffuse
